@@ -1,0 +1,429 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Douze points: Россия 1994–2021</title>
+<meta name="description" content="Голосование среди друзей по национальным отборам России на Евровидение 1994–2021.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Golos+Text:wght@400;500;600&display=swap">
+<style>
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; }
+[hidden] { display: none !important; }
+
+/* Layout: a scoreboard — ballot of ten point slots on the left, live leaderboard on the right; stacks on phones. */
+:root {
+  --bg: #f3f1f8;
+  --surface: #ffffff;
+  --ink: #1b1636;
+  --muted: #6a6487;
+  --line: #ddd8ea;
+  --accent: #5b2bd6;
+  --accent-soft: #ece5ff;
+  --gold: #b9860a;
+  --gold-bg: #fff3cf;
+  --ok: #1f7a4d;
+  --warn: #b3261e;
+  --font-display: "Unbounded", "Arial Black", system-ui, sans-serif;
+  --font-body: "Golos Text", "Segoe UI", system-ui, -apple-system, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #110d24; --surface: #1b1636; --ink: #eeeaff; --muted: #a59fc6; --line: #2f2852;
+    --accent: #a98bff; --accent-soft: #2a2152; --gold: #f2c14e; --gold-bg: #3a2e10;
+    --ok: #5fd39a; --warn: #ff8a80; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #110d24; --surface: #1b1636; --ink: #eeeaff; --muted: #a59fc6; --line: #2f2852;
+  --accent: #a98bff; --accent-soft: #2a2152; --gold: #f2c14e; --gold-bg: #3a2e10;
+  --ok: #5fd39a; --warn: #ff8a80; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 15px; line-height: 1.45; }
+.wrap { max-width: 1180px; margin: 0 auto; padding-block: 28px 56px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: grid; gap: 24px; }
+header { display: grid; gap: 6px; }
+.eyebrow { font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+h1 { font-family: var(--font-display); font-weight: 800; font-size: clamp(28px, 5vw, 46px); line-height: 1.05; margin: 0; text-wrap: balance; }
+h1 em { font-style: normal; color: var(--accent); }
+.lede { color: var(--muted); max-width: 62ch; margin: 4px 0 0; }
+h2 { font-family: var(--font-display); font-weight: 700; font-size: 18px; margin: 0; }
+.grid { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 24px; align-items: start; }
+@media (max-width: 860px) { .grid { grid-template-columns: minmax(0, 1fr); } }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 20px; display: grid; gap: 16px; min-width: 0; }
+.panel-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px; }
+.hint { color: var(--muted); font-size: 13px; }
+label.field { display: grid; gap: 6px; font-size: 13px; color: var(--muted); font-weight: 500; }
+textarea { font: 13px/1.5 ui-monospace, "SF Mono", Menlo, Consolas, monospace; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 9px; padding: 10px; width: 100%; min-width: 0; resize: vertical; }
+textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+input[type=text], select { font: inherit; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 9px; padding: 9px 10px; width: 100%; min-width: 0; }
+select:disabled { opacity: .5; }
+input:focus-visible, select:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.slots { display: grid; gap: 8px; }
+.slot { display: grid; grid-template-columns: 52px 96px minmax(0, 1fr) 32px; gap: 8px; align-items: center; }
+@media (max-width: 480px) { .slot { grid-template-columns: 46px 84px minmax(0, 1fr) 28px; gap: 6px; } }
+.pts { font-family: var(--font-display); font-weight: 800; font-size: 20px; text-align: center; font-variant-numeric: tabular-nums; border-radius: 9px; padding: 6px 0; background: var(--accent-soft); color: var(--accent); }
+.pts.top { background: var(--gold-bg); color: var(--gold); }
+.clear { border: 0; background: transparent; color: var(--muted); font-size: 18px; cursor: pointer; border-radius: 8px; height: 32px; }
+.clear:hover { background: var(--accent-soft); color: var(--ink); }
+.clear[hidden] { display: block !important; visibility: hidden; }
+.actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+button.primary { font: inherit; font-weight: 600; background: var(--accent); color: var(--surface); border: 0; border-radius: 10px; padding: 11px 20px; cursor: pointer; }
+button.primary:disabled { opacity: .45; cursor: not-allowed; }
+button.ghost { font: inherit; background: transparent; color: var(--muted); border: 1px solid var(--line); border-radius: 10px; padding: 10px 16px; cursor: pointer; }
+.status { font-size: 13px; color: var(--muted); }
+.status.ok { color: var(--ok); }
+.status.err { color: var(--warn); }
+.notice { border: 1px dashed var(--line); border-radius: 10px; padding: 12px 14px; color: var(--muted); font-size: 14px; }
+.tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+.tab { font: inherit; font-size: 13px; font-weight: 600; border: 1px solid var(--line); background: transparent; color: var(--muted); border-radius: 999px; padding: 6px 14px; cursor: pointer; }
+.tab[aria-selected="true"] { background: var(--ink); color: var(--surface); border-color: var(--ink); }
+.board { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.row { display: grid; grid-template-columns: 30px minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 8px 10px; border-radius: 10px; position: relative; overflow: hidden; }
+.row .bar { position: absolute; inset: 0 auto 0 0; background: var(--accent-soft); z-index: 0; border-radius: 10px; }
+.row > *:not(.bar) { position: relative; z-index: 1; }
+.rank { font-family: var(--font-display); font-weight: 700; font-size: 14px; color: var(--muted); text-align: right; font-variant-numeric: tabular-nums; }
+.who { min-width: 0; }
+.who b { font-weight: 600; }
+.who .song { color: var(--muted); font-size: 13px; overflow-wrap: anywhere; }
+.yr { font-size: 11px; font-weight: 600; letter-spacing: .06em; color: var(--muted); margin-right: 6px; font-variant-numeric: tabular-nums; }
+.star { color: var(--gold); }
+.total { font-family: var(--font-display); font-weight: 800; font-size: 18px; font-variant-numeric: tabular-nums; text-align: right; }
+.total small { display: block; font-family: var(--font-body); font-weight: 500; font-size: 11px; color: var(--muted); }
+.ballots { display: grid; gap: 12px; }
+.ballot { border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; display: grid; gap: 6px; }
+.ballot h3 { margin: 0; font-size: 15px; font-weight: 600; display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.ballot h3 span { color: var(--muted); font-weight: 400; font-size: 12px; }
+.bline { display: grid; grid-template-columns: 30px minmax(0, 1fr); gap: 8px; font-size: 13px; }
+.bline .p { font-family: var(--font-display); font-weight: 700; color: var(--accent); text-align: right; font-variant-numeric: tabular-nums; }
+.bline .p.top { color: var(--gold); }
+.empty { color: var(--muted); font-size: 14px; padding: 14px 4px; }
+.legend { font-size: 12px; color: var(--muted); }
+@media (prefers-reduced-motion: no-preference) { .row .bar { transition: width .5s ease; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Голосование среди друзей</div>
+    <h1>Национальные отборы России на&nbsp;Евровидение <em>1994–2021</em></h1>
+    <p class="lede">Выбери десять любимых песен из всех отборов и представителей России и раздай им баллы как на Евровидении: 12, 10, 8, 7, 6, 5, 4, 3, 2 и 1. Для каждого балла сначала выбери год, потом песню. Выбранная песня исчезает из списков для остальных баллов.</p>
+  </header>
+
+  <div id="config-note" class="notice" hidden>Страница ещё не подключена к базе. Впиши адрес проекта Supabase и publishable key в блок CONFIG в начале скрипта.</div>
+
+  <div class="grid">
+    <section class="panel" aria-labelledby="ballot-h">
+      <div class="panel-head">
+        <h2 id="ballot-h">Мой бюллетень</h2>
+        <span class="legend"><span class="star">★</span> поехал(а) на Евровидение</span>
+      </div>
+      <label class="field" for="nick">Кто ты, раздвигалочка?
+        <input type="text" id="nick" maxlength="40" placeholder="Например, Женя" autocomplete="nickname">
+      </label>
+      <div class="slots" id="slots"></div>
+      <div class="actions">
+        <button class="primary" id="save" type="button">Отправить голоса</button>
+        <button class="ghost" id="reset" type="button">Очистить</button>
+        <span class="status" id="status" role="status" aria-live="polite"></span>
+      </div>
+    </section>
+
+    <section class="panel" aria-labelledby="res-h">
+      <div class="panel-head">
+        <h2 id="res-h">Табло</h2>
+        <span class="hint" id="voters">Голосов пока нет</span>
+      </div>
+      <div class="tabs" role="tablist">
+        <button class="tab" role="tab" id="tab-board" aria-selected="true" type="button">Общий рейтинг</button>
+        <button class="tab" role="tab" id="tab-ballots" aria-selected="false" type="button">Кто за кого</button>
+      </div>
+      <ol class="board" id="board"></ol>
+      <div class="ballots" id="ballots" hidden></div>
+      <div class="actions" id="admin" hidden>
+        <button class="ghost" id="export" type="button">Скачать итоги (CSV)</button>
+      </div>
+    </section>
+  </div>
+</div>
+
+<script>
+/* ===== CONFIG: впиши свои значения из Supabase → Project Settings → API ===== */
+const CONFIG = {
+  supabaseUrl: "https://ywcrctqqzeejuuimbdnk.supabase.co",
+  supabaseKey: "sb_publishable_o4mOOKHKZp-TWMgo51B8tw_LmSpon9i",
+  pollSeconds: 15,
+};
+/* ========================================================================= */
+
+const ENTRIES = [[1994,"Youddiph","Vechny strannik",1],[1994,"Alyssa Mon","Va-banque",0],[1994,"Andrey Misin","Russkaya liricheskaya",0],[1994,"Elena Kirii","Devki pesni raspevayut",0],[1994,"Kvartal","Prileti ko mne",0],[1994,"Megapolis","Pushkin",0],[1994,"Nogu Svelo!","Sibirskaya lyubov",0],[1994,"Sergey Penkin","Vspomni",0],[1994,"Tatyana Martsynkovskaya","Raspyatiye",0],[1995,"Philipp Kirkorov","Kolybelnaya dlya vulkana",1],[1995,"Aleksey Moldaliev","Dlya tebya",0],[1995,"Diana Shagaeva","Zvezda",0],[1995,"Inesh Kdyrova","Ya vizhu solntse",0],[1995,"Natalia Shturm","Monetka",0],[1995,"Oksana Pavlovskaya","V sinem sne",0],[1995,"Olga Dzusova","Maska",0],[1995,"Vasily Bogatyrev","Portret",0],[1995,"Viktoria Vita","Epitafiya",0],[1996,"Andrey Kosinsky","Ya eto ya",1],[1996,"Elena Kuzmina","Veterki",0],[1996,"Felix","Serebryanniy veter",0],[1996,"Inna Zhelannaya","Letai",0],[1996,"Lisa Myalik","Zemlya moya",0],[1996,"Nogu Svelo!","Moskovskiy romans",0],[1996,"Olga Dzusova","Zheltie babochki",0],[1996,"Sergey Rogozin & Terem Kvartet","Igray sudba",0],[1996,"Tatyana Anisemova","Voyennaya kolybelnaya",0],[1996,"Timur Gorsky","Nekrasivaya",0],[1996,"Viktoria Vita","Belye gory",0],[1996,"Vladimir Trushin","Drugaya",0],[1996,"Vokal Band","Musyka plus",0],[1996,"Zhanna Dobrovolskaya","Veruyu v lyubov",0],[1997,"Alla Pugacheva","Primadonna",1],[2000,"Alsou","Solo",1],[2001,"Mumiy Troll","Lady Alpine Blue",1],[2002,"Prime Minister","Northern Girl",1],[2003,"t.A.T.u.","Ne ver', ne boysia",1],[2004,"Julia Savicheva","Believe Me",1],[2005,"Natalia Podolskaya","Nobody Hurt No One",1],[2005,"A-Sortie","Keep On Shining",0],[2005,"Aleksandr Panayotov & Alexey Chumakov","Balalayka",0],[2005,"Anastasia Stotskaya","Shadows Dance All Around Me",0],[2005,"Anita Tsoy","La-la-ley",0],[2005,"Anzhelika Rudnitskaya","Serdtse angela",0],[2005,"Batyrkhan Shukenov","Tvoi shagi",0],[2005,"Be Good","Take Me Back to Rio",0],[2005,"Chay Vdvoyom","Lusille Is My Name",0],[2005,"City","Gorod lyubvi",0],[2005,"Dima Bilan","Not That Simple",0],[2005,"Irina Schott","Identify Yourself",0],[2005,"Jam & Yelena Terleyeva","No More War",0],[2005,"Katya Bachurina","Teryala tebya",0],[2005,"KGB","Stop",0],[2005,"Lada Dance","Mixed Up World",0],[2005,"Lana Light","Never Never",0],[2005,"Nikolay Demidov","Differences",0],[2005,"Oksana Mazhulis","Rebel Angel",0],[2005,"Playgirls","Don't Get Down Like That",0],[2005,"Polina Griffith","Justice of Love",0],[2005,"Reflex","Lyublyu",0],[2005,"Roman Polonskiy","The Story of My Life",0],[2005,"Roman Smirnov","One Day",0],[2005,"Sankt-Peterburg","Matreshki",0],[2005,"Slava","I Wanna Be the One",0],[2005,"Varvara","Letala da pela",0],[2005,"Victoria Markova","Ya zakroyu dver",0],[2005,"Zveri","Snegopad",0],[2006,"Dima Bilan","Never Let You Go",1],[2007,"Serebro","Song #1",1],[2008,"Dima Bilan","Believe",1],[2008,"A-Sortie","Colours of My Love",0],[2008,"Aero","Siberia",0],[2008,"Aleksandr Panayotov","Crescent and Cross",0],[2008,"Alexey Vorobyov","New Russian Kalinka",0],[2008,"Anatoly Alyoshin","One More Try",0],[2008,"Anna Mushak & Project William","The Needle",0],[2008,"Asılyar","Qarlığaçlar",0],[2008,"Aziya","Odinokiy dozhd",0],[2008,"BK!","Don't Break My Heart",0],[2008,"Granat","Another Side of Midnight",0],[2008,"Helena Gorskaya","Always All Alone",0],[2008,"Max Lorens & Satsura","Day nam dozhd'",0],[2008,"Natalia Astafyeva","Tri luny",0],[2008,"Natalia Terekhova","So Can You Tell Me",0],[2008,"Nora Adam","Gotta Let It Go",0],[2008,"Olga Varvus","King of Seduction",0],[2008,"Pierre Narciss & Jam Sheriff","Who Am I Without Your Love",0],[2008,"Polina Smolova","Na rasstoyanii dykhanya",0],[2008,"Premyer-Ministr","My parallelniye miry",0],[2008,"Roman Bezhin","I'm Missing",0],[2008,"Sabrina","Wreck",0],[2008,"Sergey Lazarev","Flyer",0],[2008,"Tamila Bloggy","Sny",0],[2008,"Yulia Mikhalchik","Cold Fingers",0],[2008,"Zhenya Otradnaya","Porque amor",0],[2008,"Zhenya Rasskazova","Otpuskayu tebya",0],[2009,"Anastasia Prikhodko","Mamo",1],[2009,"Aleksa","Ne dumat o tebe",0],[2009,"Alexey Vorobyov","Angelom byt",0],[2009,"Anna Semenovich","Love lovila",0],[2009,"Arishata","Breakdown",0],[2009,"Kvatro","Lyubovyu otvechay",0],[2009,"Nano","Traitor",0],[2009,"Nikolay Fokeev","You Can't Stop the Time",0],[2009,"Plazma","Never Ending Story",0],[2009,"Polina Griffith","Cry for You",0],[2009,"Princessa Avenue","Never, Never",0],[2009,"Tim Rocks","The Happiest Man",0],[2009,"Tomas N'evergreen","One More Try",0],[2009,"Unisex","Ai-ai-ai",0],[2009,"Valeriya","Back to Love",0],[2009,"Venger Collective","9 O'Clock Moscow",0],[2010,"Peter Nalitch & Friends","Lost and Forgotten",1],[2010,"Alaska","Piastry",0],[2010,"Aleksandr Panayotov","Maya Showtime",0],[2010,"Alyona Roxis","My Tears",0],[2010,"Ana","Dva golosa",0],[2010,"Antonello Carozza","Senza respiro",0],[2010,"Buranovskiye Babushki","Dlinnaya-dlinnaya beresta i kak sdelat' iz neyo aishon",0],[2010,"Ed Shulzhevskiy","Without You",0],[2010,"Ekaterina Frolova","Tout va bien",0],[2010,"Elena Esenina","Mir bez tebya",0],[2010,"Jay Stever","I Love, I Love, I Love You",0],[2010,"Jet Kids","Hey Say",0],[2010,"Los Devchatos","Chocolate",0],[2010,"Miusha","Big Bang",0],[2010,"Nano","Take It Away",0],[2010,"Natalia Terekhova","Everything",0],[2010,"Natalya Damas & L'brand","Much Closer",0],[2010,"Oleg Bezinskikh","Crowning",0],[2010,"Para-Bellum","Ptitsa",0],[2010,"Pavla","Infatuated",0],[2010,"Polina Kozhikova","For You",0],[2010,"Princessa Avenue","Lovers",0],[2010,"Pyotr Sukhov","Ya uletayu",0],[2010,"Scenakardia","Styokla",0],[2010,"Yulika","Delete",0],[2011,"Alexey Vorobyov","Get You",1],[2012,"Buranovskiye Babushki","Party for Everybody",1],[2012,"4POST","Navstrechu nebu",0],[2012,"Chinkong ft. Karina","High Up",0],[2012,"Dima Bilan & Julia Volkova","Back to Her Future",0],[2012,"Ed Shulzhevskiy","Sto minut",0],[2012,"Efrosiya","Ya tebya lyubila",0],[2012,"Elena Ekimova","Do You Like?",0],[2012,"Farinelli Balls","Breath Away Song",0],[2012,"Irson Kudikova","Woman's Heart Never Lies",0],[2012,"Jet Kids","Oh Yeah",0],[2012,"Katya Savelieva","Life's Beautiful",0],[2012,"Ksenona","Close My Eyes",0],[2012,"Lena Maksimova","Brave",0],[2012,"Marie Carné","Mezhdu nebom i zemlyoy",0],[2012,"Mark Tishman","Money vs Love",0],[2012,"Olga Makovetskaya","Positive Emotions",0],[2012,"Pavla","One Million Butterflies",0],[2012,"Polina Smolova","Michael",0],[2012,"Rene","I Miss You",0],[2012,"Riff Action Family","Sky",0],[2012,"Sardor","Believe",0],[2012,"Syostry Syo","Une marionette",0],[2012,"The Ups!","Kiss",0],[2012,"Timati & Aida Garifullina","Fantasy",0],[2012,"Unite It","Filling My Life",0],[2013,"Dina Garipova","What If",1],[2014,"Tolmachevy Sisters","Shine",1],[2015,"Polina Gagarina","A Million Voices",1],[2016,"Sergey Lazarev","You Are the Only One",1],[2017,"Julia Samoylova","Flame Is Burning",1],[2018,"Julia Samoylova","I Won't Break",1],[2019,"Sergey Lazarev","Scream",1],[2020,"Little Big","Uno",1],[2021,"Manizha","Russian Woman (Russkaya zhenshchina)",1],[2021,"#2Mashi","Bitter Words",0],[2021,"Therr Maitz","Future Is Bright",0]];
+const POINTS = [12, 10, 8, 7, 6, 5, 4, 3, 2, 1];
+const byId = new Map();
+const byYear = new Map();
+ENTRIES.forEach(([year, artist, song, rep]) => {
+  const id = year + "|" + artist + "|" + song;
+  const e = { id, year, artist, song, rep: !!rep };
+  byId.set(id, e);
+  if (!byYear.has(year)) byYear.set(year, []);
+  byYear.get(year).push(e);
+});
+const YEARS = [...byYear.keys()].sort((a, b) => a - b);
+const configured = !/YOUR-/.test(CONFIG.supabaseUrl + CONFIG.supabaseKey);
+
+const state = {
+  picks: Object.fromEntries(POINTS.map(p => [p, null])),
+  years: Object.fromEntries(POINTS.map(p => [p, ""])),
+  ballots: [], loaded: false, dirty: false,
+};
+
+const $ = id => document.getElementById(id);
+function el(tag, attrs = {}, text) {
+  const n = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) {
+    if (k === "class") n.className = v; else if (v !== false && v != null) n.setAttribute(k, v === true ? "" : v);
+  }
+  if (text != null) n.textContent = text;
+  return n;
+}
+function store(key, val) { try { if (val === undefined) return localStorage.getItem(key); localStorage.setItem(key, val); } catch (e) { return null; } }
+
+function voterId() {
+  let id = store("dp-voter");
+  if (!id) {
+    id = (crypto.randomUUID ? crypto.randomUUID() : "10000000-1000-4000-8000-100000000000".replace(/[018]/g, c => (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)));
+    store("dp-voter", id);
+  }
+  return id;
+}
+
+/* ---- Supabase REST ---- */
+async function api(fn, body) {
+  const headers = { "Content-Type": "application/json", apikey: CONFIG.supabaseKey };
+  if (CONFIG.supabaseKey.startsWith("eyJ")) headers.Authorization = "Bearer " + CONFIG.supabaseKey;
+  const res = await fetch(CONFIG.supabaseUrl.replace(/\/$/, "") + "/rest/v1/rpc/" + fn, { method: "POST", headers, body: JSON.stringify(body || {}) });
+  if (!res.ok) {
+    let msg = res.status + "";
+    try { const j = await res.json(); msg = j.message || j.hint || msg; } catch (e) {}
+    throw new Error(msg);
+  }
+  const t = await res.text();
+  return t ? JSON.parse(t) : null;
+}
+
+/* ---- Ballot UI ---- */
+function buildSlots() {
+  POINTS.forEach(p => {
+    const row = el("div", { class: "slot" });
+    row.append(el("div", { class: "pts" + (p === 12 ? " top" : ""), "aria-hidden": "true" }, p));
+    const ysel = el("select", { id: "year-" + p, "aria-label": p + " баллов: год" });
+    ysel.append(el("option", { value: "" }, "Год"));
+    YEARS.forEach(y => ysel.append(el("option", { value: y }, y)));
+    const asel = el("select", { id: "artist-" + p, "aria-label": p + " баллов: песня", disabled: true });
+    const clr = el("button", { class: "clear", type: "button", "aria-label": "Убрать " + p + " баллов", title: "Убрать" }, "×");
+    ysel.addEventListener("change", () => {
+      state.years[p] = ysel.value;
+      const cur = state.picks[p] && byId.get(state.picks[p]);
+      if (!cur || String(cur.year) !== ysel.value) state.picks[p] = null;
+      changed();
+    });
+    asel.addEventListener("change", () => { state.picks[p] = asel.value || null; changed(); });
+    clr.addEventListener("click", () => { state.picks[p] = null; state.years[p] = ""; changed(); });
+    row.append(ysel, asel, clr);
+    $("slots").append(row);
+  });
+}
+
+function renderSlots() {
+  const used = new Map();
+  POINTS.forEach(p => { if (state.picks[p]) used.set(state.picks[p], p); });
+  POINTS.forEach(p => {
+    const ysel = $("year-" + p), asel = $("artist-" + p);
+    const pick = state.picks[p] && byId.get(state.picks[p]);
+    const year = pick ? String(pick.year) : state.years[p];
+    ysel.value = year;
+    asel.textContent = "";
+    if (!year) {
+      asel.append(el("option", { value: "" }, "Сначала выбери год"));
+      asel.disabled = true;
+    } else {
+      asel.disabled = false;
+      const free = byYear.get(Number(year)).filter(e => { const o = used.get(e.id); return o == null || o === p; });
+      asel.append(el("option", { value: "" }, free.length ? "Песня" : "Все песни этого года уже выбраны"));
+      free.forEach(e => asel.append(el("option", { value: e.id }, (e.rep ? "★ " : "") + e.artist + " — " + e.song)));
+      asel.value = pick ? pick.id : "";
+    }
+    ysel.closest(".slot").querySelector(".clear").hidden = !(pick || year);
+  });
+  $("save").disabled = !configured || POINTS.every(p => !state.picks[p]);
+}
+
+function changed() {
+  state.dirty = true;
+  setStatus("");
+  renderSlots();
+  store("dp-draft", JSON.stringify({ nick: $("nick").value, picks: state.picks }));
+}
+function setStatus(text, kind) { const s = $("status"); s.textContent = text; s.className = "status" + (kind ? " " + kind : ""); }
+
+function restoreDraft() {
+  try {
+    const d = JSON.parse(store("dp-draft") || "null");
+    if (!d) return;
+    if (d.nick) $("nick").value = d.nick;
+    POINTS.forEach(p => {
+      const id = d.picks && d.picks[p];
+      if (id && byId.has(id)) { state.picks[p] = id; state.years[p] = String(byId.get(id).year); }
+    });
+  } catch (e) {}
+}
+
+async function save() {
+  const nick = $("nick").value.trim();
+  if (!nick) { setStatus("Впиши имя, чтобы друзья поняли, чей это бюллетень.", "err"); $("nick").focus(); return; }
+  const points = {};
+  POINTS.forEach(p => { if (state.picks[p]) points[p] = state.picks[p]; });
+  if (!Object.keys(points).length) { setStatus("Выбери хотя бы одну песню.", "err"); return; }
+  $("save").disabled = true;
+  setStatus("Отправляю…");
+  try {
+    await api("douze_submit", { p_voter: voterId(), p_nick: nick, p_points: points });
+    state.dirty = false;
+    store("dp-nick", nick);
+    const missing = POINTS.filter(p => !points[p]);
+    setStatus(missing.length ? "Голоса отправлены. Свободные баллы: " + missing.join(", ") + "." : "Голоса отправлены. Спасибо!", "ok");
+    await load();
+  } catch (e) {
+    setStatus("Не удалось отправить: " + e.message + ". Попробуй ещё раз через минуту.", "err");
+  } finally {
+    renderSlots();
+  }
+}
+
+/* ---- Results ---- */
+function totalsRows() {
+  const totals = new Map();
+  state.ballots.forEach(b => POINTS.forEach(p => {
+    const id = b.points && b.points[p];
+    if (!id || !byId.has(id)) return;
+    const t = totals.get(id) || { id, total: 0, twelves: 0, votes: 0 };
+    t.total += p; t.votes += 1; if (p === 12) t.twelves += 1;
+    totals.set(id, t);
+  }));
+  return [...totals.values()].sort((a, b) => b.total - a.total || b.twelves - a.twelves || b.votes - a.votes);
+}
+
+function plural(n, one, few, many) {
+  const m10 = n % 10, m100 = n % 100;
+  if (m10 === 1 && m100 !== 11) return one;
+  if (m10 >= 2 && m10 <= 4 && (m100 < 10 || m100 >= 20)) return few;
+  return many;
+}
+
+function renderResults() {
+  const rows = totalsRows();
+  const n = state.ballots.length;
+  const myNick = (store("dp-nick") || "").toLowerCase();
+  $("voters").textContent = n ? "Проголосовали: " + n : "Голосов пока нет";
+  const board = $("board");
+  board.textContent = "";
+  if (!state.loaded) {
+    board.append(el("li", { class: "empty" }, configured ? "Загружаю табло…" : "Табло появится, когда страница подключится к базе."));
+  } else if (!rows.length) {
+    board.append(el("li", { class: "empty" }, "Пока никто не проголосовал. Заполни бюллетень и нажми «Отправить голоса»: твои баллы сразу появятся здесь."));
+  } else {
+    const max = rows[0].total;
+    let rank = 0, prev = null;
+    rows.forEach((r, i) => {
+      if (r.total !== prev) { rank = i + 1; prev = r.total; }
+      const e = byId.get(r.id);
+      const li = el("li", { class: "row" });
+      const bar = el("div", { class: "bar" }); bar.style.width = Math.max(4, Math.round(r.total / max * 100)) + "%";
+      const who = el("div", { class: "who" });
+      const top = el("div");
+      top.append(el("span", { class: "yr" }, e.year));
+      if (e.rep) top.append(el("span", { class: "star", title: "Представитель России" }, "★ "));
+      top.append(el("b", {}, e.artist));
+      who.append(top, el("div", { class: "song" }, e.song));
+      const tot = el("div", { class: "total" }, r.total);
+      tot.append(el("small", {}, r.twelves ? "12 × " + r.twelves : r.votes + " " + plural(r.votes, "голос", "голоса", "голосов")));
+      li.append(bar, el("div", { class: "rank" }, rank), who, tot);
+      board.append(li);
+    });
+  }
+  const ballots = $("ballots");
+  ballots.textContent = "";
+  if (!n) {
+    ballots.append(el("div", { class: "empty" }, "Здесь будут бюллетени каждого, кто проголосовал."));
+  } else {
+    state.ballots.forEach(b => {
+      const card = el("div", { class: "ballot" });
+      const h = el("h3", {}, (b.nick || "Без имени") + (myNick && b.nick.toLowerCase() === myNick ? " (ты)" : ""));
+      if (b.updated_at) h.append(el("span", {}, new Date(b.updated_at).toLocaleString("ru-RU", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })));
+      card.append(h);
+      POINTS.forEach(p => {
+        const e = b.points && b.points[p] && byId.get(b.points[p]);
+        if (!e) return;
+        const line = el("div", { class: "bline" });
+        line.append(el("span", { class: "p" + (p === 12 ? " top" : "") }, p), el("span", {}, e.year + " · " + (e.rep ? "★ " : "") + e.artist + " — " + e.song));
+        card.append(line);
+      });
+      ballots.append(card);
+    });
+  }
+}
+
+async function load() {
+  if (!configured) return;
+  try {
+    const rows = await api("douze_results");
+    state.ballots = (rows || []).map(r => ({ nick: String(r.nick || "").slice(0, 40), points: r.points && typeof r.points === "object" ? r.points : {}, updated_at: r.updated_at }));
+    state.loaded = true;
+    renderResults();
+  } catch (e) {
+    if (!state.loaded) { $("board").textContent = ""; $("board").append(el("li", { class: "empty" }, "Не получилось загрузить табло: " + e.message + ".")); }
+  }
+}
+
+function setView(v) {
+  $("tab-board").setAttribute("aria-selected", v === "board");
+  $("tab-ballots").setAttribute("aria-selected", v === "ballots");
+  $("board").hidden = v !== "board";
+  $("ballots").hidden = v !== "ballots";
+  store("dp-view", v);
+}
+
+/* ---- CSV export (open the page with #admin) ---- */
+function csvCell(v) { const s = String(v); return /[;"\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; }
+function exportCsv() {
+  const out = [["Место", "Год", "Исполнитель", "Песня", "Баллы", "Двенадцатки", "Голосов"]];
+  let rank = 0, prev = null;
+  totalsRows().forEach((r, i) => { if (r.total !== prev) { rank = i + 1; prev = r.total; } const e = byId.get(r.id); out.push([rank, e.year, e.artist, e.song, r.total, r.twelves, r.votes]); });
+  out.push([], ["Кто", "Балл", "Год", "Исполнитель", "Песня", "Когда"]);
+  state.ballots.forEach(b => POINTS.forEach(p => { const e = b.points[p] && byId.get(b.points[p]); if (e) out.push([b.nick, p, e.year, e.artist, e.song, b.updated_at || ""]); }));
+  const csv = "﻿" + out.map(r => r.map(csvCell).join(";")).join("\r\n");
+  const a = el("a", { href: URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" })), download: "douze-points-itogi.csv" });
+  document.body.append(a); a.click(); a.remove();
+}
+
+/* ---- Start ---- */
+buildSlots();
+restoreDraft();
+renderSlots();
+renderResults();
+if (!configured) $("config-note").hidden = false;
+if (store("dp-view") === "ballots") setView("ballots");
+if (location.hash === "#admin") $("admin").hidden = false;
+$("tab-board").addEventListener("click", () => setView("board"));
+$("tab-ballots").addEventListener("click", () => setView("ballots"));
+$("save").addEventListener("click", save);
+$("reset").addEventListener("click", () => { POINTS.forEach(p => { state.picks[p] = null; state.years[p] = ""; }); changed(); });
+$("nick").addEventListener("input", () => { setStatus(""); store("dp-draft", JSON.stringify({ nick: $("nick").value, picks: state.picks })); });
+$("export").addEventListener("click", exportCsv);
+load();
+setInterval(() => { if (!document.hidden) load(); }, CONFIG.pollSeconds * 1000);
+</script>
+
+</body>
+</html>
