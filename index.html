@@ -102,6 +102,7 @@ button.ghost { font: inherit; background: transparent; color: var(--muted); bord
 .empty { color: var(--muted); font-size: 14px; padding: 14px 4px; }
 .legend { font-size: 12px; color: var(--muted); }
 @media (prefers-reduced-motion: no-preference) { .row .bar { transition: width .5s ease; } }
+.grid { grid-template-columns: minmax(0, 1fr); max-width: 720px; }
 </style>
 </head>
 <body>
@@ -131,21 +132,6 @@ button.ghost { font: inherit; background: transparent; color: var(--muted); bord
       </div>
     </section>
 
-    <section class="panel" aria-labelledby="res-h">
-      <div class="panel-head">
-        <h2 id="res-h">Табло</h2>
-        <span class="hint" id="voters">Голосов пока нет</span>
-      </div>
-      <div class="tabs" role="tablist">
-        <button class="tab" role="tab" id="tab-board" aria-selected="true" type="button">Общий рейтинг</button>
-        <button class="tab" role="tab" id="tab-ballots" aria-selected="false" type="button">Кто за кого</button>
-      </div>
-      <ol class="board" id="board"></ol>
-      <div class="ballots" id="ballots" hidden></div>
-      <div class="actions" id="admin" hidden>
-        <button class="ghost" id="export" type="button">Скачать итоги (CSV)</button>
-      </div>
-    </section>
   </div>
 </div>
 
@@ -154,7 +140,6 @@ button.ghost { font: inherit; background: transparent; color: var(--muted); bord
 const CONFIG = {
   supabaseUrl: "https://ywcrctqqzeejuuimbdnk.supabase.co",
   supabaseKey: "sb_publishable_o4mOOKHKZp-TWMgo51B8tw_LmSpon9i",
-  pollSeconds: 15,
 };
 /* ========================================================================= */
 
@@ -292,8 +277,7 @@ async function save() {
     state.dirty = false;
     store("dp-nick", nick);
     const missing = POINTS.filter(p => !points[p]);
-    setStatus(missing.length ? "Голоса отправлены. Свободные баллы: " + missing.join(", ") + "." : "Голоса отправлены. Спасибо!", "ok");
-    await load();
+    setStatus(missing.length ? "Голоса отправлены. Свободные баллы: " + missing.join(", ") + "." : "Голоса отправлены. Спасибо! Итоги объявим отдельно.", "ok");
   } catch (e) {
     setStatus("Не удалось отправить: " + e.message + ". Попробуй ещё раз через минуту.", "err");
   } finally {
@@ -301,128 +285,14 @@ async function save() {
   }
 }
 
-/* ---- Results ---- */
-function totalsRows() {
-  const totals = new Map();
-  state.ballots.forEach(b => POINTS.forEach(p => {
-    const id = b.points && b.points[p];
-    if (!id || !byId.has(id)) return;
-    const t = totals.get(id) || { id, total: 0, twelves: 0, votes: 0 };
-    t.total += p; t.votes += 1; if (p === 12) t.twelves += 1;
-    totals.set(id, t);
-  }));
-  return [...totals.values()].sort((a, b) => b.total - a.total || b.twelves - a.twelves || b.votes - a.votes);
-}
-
-function plural(n, one, few, many) {
-  const m10 = n % 10, m100 = n % 100;
-  if (m10 === 1 && m100 !== 11) return one;
-  if (m10 >= 2 && m10 <= 4 && (m100 < 10 || m100 >= 20)) return few;
-  return many;
-}
-
-function renderResults() {
-  const rows = totalsRows();
-  const n = state.ballots.length;
-  const myNick = (store("dp-nick") || "").toLowerCase();
-  $("voters").textContent = n ? "Проголосовали: " + n : "Голосов пока нет";
-  const board = $("board");
-  board.textContent = "";
-  if (!state.loaded) {
-    board.append(el("li", { class: "empty" }, configured ? "Загружаю табло…" : "Табло появится, когда страница подключится к базе."));
-  } else if (!rows.length) {
-    board.append(el("li", { class: "empty" }, "Пока никто не проголосовал. Заполни бюллетень и нажми «Отправить голоса»: твои баллы сразу появятся здесь."));
-  } else {
-    const max = rows[0].total;
-    let rank = 0, prev = null;
-    rows.forEach((r, i) => {
-      if (r.total !== prev) { rank = i + 1; prev = r.total; }
-      const e = byId.get(r.id);
-      const li = el("li", { class: "row" });
-      const bar = el("div", { class: "bar" }); bar.style.width = Math.max(4, Math.round(r.total / max * 100)) + "%";
-      const who = el("div", { class: "who" });
-      const top = el("div");
-      top.append(el("span", { class: "yr" }, e.year));
-      if (e.rep) top.append(el("span", { class: "star", title: "Представитель России" }, "★ "));
-      top.append(el("b", {}, e.artist));
-      who.append(top, el("div", { class: "song" }, e.song));
-      const tot = el("div", { class: "total" }, r.total);
-      tot.append(el("small", {}, r.twelves ? "12 × " + r.twelves : r.votes + " " + plural(r.votes, "голос", "голоса", "голосов")));
-      li.append(bar, el("div", { class: "rank" }, rank), who, tot);
-      board.append(li);
-    });
-  }
-  const ballots = $("ballots");
-  ballots.textContent = "";
-  if (!n) {
-    ballots.append(el("div", { class: "empty" }, "Здесь будут бюллетени каждого, кто проголосовал."));
-  } else {
-    state.ballots.forEach(b => {
-      const card = el("div", { class: "ballot" });
-      const h = el("h3", {}, (b.nick || "Без имени") + (myNick && b.nick.toLowerCase() === myNick ? " (ты)" : ""));
-      if (b.updated_at) h.append(el("span", {}, new Date(b.updated_at).toLocaleString("ru-RU", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })));
-      card.append(h);
-      POINTS.forEach(p => {
-        const e = b.points && b.points[p] && byId.get(b.points[p]);
-        if (!e) return;
-        const line = el("div", { class: "bline" });
-        line.append(el("span", { class: "p" + (p === 12 ? " top" : "") }, p), el("span", {}, e.year + " · " + (e.rep ? "★ " : "") + e.artist + " — " + e.song));
-        card.append(line);
-      });
-      ballots.append(card);
-    });
-  }
-}
-
-async function load() {
-  if (!configured) return;
-  try {
-    const rows = await api("douze_results");
-    state.ballots = (rows || []).map(r => ({ nick: String(r.nick || "").slice(0, 40), points: r.points && typeof r.points === "object" ? r.points : {}, updated_at: r.updated_at }));
-    state.loaded = true;
-    renderResults();
-  } catch (e) {
-    if (!state.loaded) { $("board").textContent = ""; $("board").append(el("li", { class: "empty" }, "Не получилось загрузить табло: " + e.message + ".")); }
-  }
-}
-
-function setView(v) {
-  $("tab-board").setAttribute("aria-selected", v === "board");
-  $("tab-ballots").setAttribute("aria-selected", v === "ballots");
-  $("board").hidden = v !== "board";
-  $("ballots").hidden = v !== "ballots";
-  store("dp-view", v);
-}
-
-/* ---- CSV export (open the page with #admin) ---- */
-function csvCell(v) { const s = String(v); return /[;"\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; }
-function exportCsv() {
-  const out = [["Место", "Год", "Исполнитель", "Песня", "Баллы", "Двенадцатки", "Голосов"]];
-  let rank = 0, prev = null;
-  totalsRows().forEach((r, i) => { if (r.total !== prev) { rank = i + 1; prev = r.total; } const e = byId.get(r.id); out.push([rank, e.year, e.artist, e.song, r.total, r.twelves, r.votes]); });
-  out.push([], ["Кто", "Балл", "Год", "Исполнитель", "Песня", "Когда"]);
-  state.ballots.forEach(b => POINTS.forEach(p => { const e = b.points[p] && byId.get(b.points[p]); if (e) out.push([b.nick, p, e.year, e.artist, e.song, b.updated_at || ""]); }));
-  const csv = "﻿" + out.map(r => r.map(csvCell).join(";")).join("\r\n");
-  const a = el("a", { href: URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" })), download: "douze-points-itogi.csv" });
-  document.body.append(a); a.click(); a.remove();
-}
-
 /* ---- Start ---- */
 buildSlots();
 restoreDraft();
 renderSlots();
-renderResults();
 if (!configured) $("config-note").hidden = false;
-if (store("dp-view") === "ballots") setView("ballots");
-if (location.hash === "#admin") $("admin").hidden = false;
-$("tab-board").addEventListener("click", () => setView("board"));
-$("tab-ballots").addEventListener("click", () => setView("ballots"));
 $("save").addEventListener("click", save);
 $("reset").addEventListener("click", () => { POINTS.forEach(p => { state.picks[p] = null; state.years[p] = ""; }); changed(); });
 $("nick").addEventListener("input", () => { setStatus(""); store("dp-draft", JSON.stringify({ nick: $("nick").value, picks: state.picks })); });
-$("export").addEventListener("click", exportCsv);
-load();
-setInterval(() => { if (!document.hidden) load(); }, CONFIG.pollSeconds * 1000);
 </script>
 
 </body>
