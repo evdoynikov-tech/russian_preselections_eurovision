@@ -1,0 +1,259 @@
+<title>Douze points: результаты</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800;900&family=Golos+Text:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: a broadcast scoreboard on a night stage — top-10 table on the left, the current spokesperson's card on the right. Single dark look by choice. */
+:root {
+  --stage: #0b0820;
+  --stage-2: #1a1145;
+  --row: #19143d;
+  --row-hi: #241c57;
+  --ink: #f4f1ff;
+  --muted: #a49cd0;
+  --line: #2e2667;
+  --accent: #ff3d8b;
+  --accent-2: #7c5cff;
+  --gold: #ffcf3f;
+  --gold-ink: #2a1d00;
+  --rh: 58px;
+  --font-display: "Unbounded", "Arial Black", system-ui, sans-serif;
+  --font-body: "Golos Text", "Segoe UI", system-ui, -apple-system, sans-serif;
+  color-scheme: dark;
+}
+@media (max-width: 640px) { :root { --rh: 54px; } }
+* { box-sizing: border-box; }
+html, body { min-height: 100%; }
+body {
+  background: radial-gradient(1200px 600px at 15% -10%, #3a1e8a55, transparent 60%), radial-gradient(900px 500px at 110% 10%, #ff3d8b33, transparent 60%), var(--stage);
+  color: var(--ink); font-family: var(--font-body); font-size: 15px; user-select: none; cursor: pointer;
+}
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--stage); }
+.wrap { max-width: 1240px; margin: 0 auto; padding-block: 24px 40px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: grid; gap: 20px; }
+header { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px; }
+.eyebrow { font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+h1 { font-family: var(--font-display); font-weight: 800; font-size: clamp(22px, 3.6vw, 36px); line-height: 1.1; margin: 4px 0 0; text-wrap: balance; }
+h1 em { font-style: normal; background: linear-gradient(90deg, var(--accent), var(--accent-2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.progress { display: grid; gap: 6px; min-width: 200px; }
+.progress-label { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; text-align: right; }
+.bar { height: 6px; border-radius: 99px; background: var(--line); overflow: hidden; }
+.bar > i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--accent-2), var(--accent)); transition: width .5s ease; }
+.grid { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+@media (max-width: 900px) { .grid { grid-template-columns: minmax(0, 1fr); } }
+.board { position: relative; height: calc(var(--rh) * 10 + 6px * 9); }
+.row {
+  position: absolute; left: 0; right: 0; height: var(--rh);
+  display: grid; grid-template-columns: 44px 64px minmax(0, 1fr) auto 64px; align-items: center; gap: 10px;
+  background: var(--row); border: 1px solid var(--line); border-radius: 12px; padding: 0 10px 0 6px;
+  transition: top .9s cubic-bezier(.2,.8,.2,1), opacity .5s ease, background .4s ease, border-color .4s ease;
+}
+@media (max-width: 640px) { .list li { font-size: 15px; grid-template-columns: 36px minmax(0, 1fr); } .list .p { font-size: 16px; } .list li.twelve { font-size: 17px; } .card { padding: 20px; } }
+@media (max-width: 640px) { .row { grid-template-columns: 30px 48px minmax(0, 1fr) auto 50px; gap: 6px; padding-left: 4px; } }
+.row.lead { background: linear-gradient(90deg, #3b2a00, var(--row) 70%); border-color: #7a5a00; }
+.row.got { background: var(--row-hi); border-color: var(--accent-2); }
+.rank { font-family: var(--font-display); font-weight: 700; font-size: 16px; color: var(--muted); text-align: center; font-variant-numeric: tabular-nums; }
+.row.lead .rank { color: var(--gold); }
+.year { font-family: var(--font-display); font-weight: 700; font-size: 13px; text-align: center; padding: 6px 0; border-radius: 8px; background: #ffffff10; color: var(--ink); font-variant-numeric: tabular-nums; }
+.who { min-width: 0; line-height: 1.2; }
+.who b { display: block; font-weight: 700; font-size: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.who span { display: block; color: var(--muted); font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+@media (max-width: 640px) { .who b { font-size: 14px; } .who span { font-size: 12px; } .year { font-size: 11px; } }
+.star { color: var(--gold); }
+.who b .star { display: inline; font-size: inherit; color: var(--gold); }
+.gain { font-family: var(--font-display); font-weight: 800; font-size: 15px; min-width: 40px; height: 34px; padding: 0 8px; border-radius: 9px; display: grid; place-items: center; background: var(--accent); color: #fff; opacity: 0; transform: scale(.4); transition: opacity .3s ease, transform .4s cubic-bezier(.3,1.6,.5,1); font-variant-numeric: tabular-nums; }
+.gain.on { opacity: 1; transform: scale(1); }
+.gain.twelve { background: var(--gold); color: var(--gold-ink); }
+.total { font-family: var(--font-display); font-weight: 900; font-size: 22px; text-align: right; font-variant-numeric: tabular-nums; }
+@media (max-width: 640px) { .total { font-size: 18px; } .gain { min-width: 32px; height: 30px; font-size: 13px; } }
+.total.bump { animation: bump .6s ease; }
+@keyframes bump { 40% { transform: scale(1.25); color: var(--gold); } }
+.card { background: linear-gradient(160deg, var(--stage-2), var(--row)); border: 1px solid var(--line); border-radius: 18px; padding: 26px 28px; display: grid; gap: 18px; min-width: 0; }
+.card .eyebrow { color: var(--accent); }
+.spokes { font-family: var(--font-display); font-weight: 800; font-size: clamp(26px, 3.4vw, 40px); line-height: 1.15; overflow-wrap: anywhere; }
+.list { list-style: none; margin: 0; padding: 0; display: grid; gap: 7px; }
+.list li { display: grid; grid-template-columns: 46px minmax(0, 1fr); gap: 12px; align-items: baseline; font-size: 18px; opacity: .3; transition: opacity .4s ease; }
+.list li.on { opacity: 1; }
+.list .p { font-family: var(--font-display); font-weight: 800; font-size: 20px; text-align: right; color: var(--accent-2); font-variant-numeric: tabular-nums; }
+.list li.twelve .p { color: var(--gold); }
+.list li.twelve { font-weight: 700; font-size: 22px; }
+.list li.twelve .p { font-size: 26px; }
+.list li.wait { opacity: .3; }
+.slot12 { display: grid; gap: 6px; padding: 14px 16px; border-radius: 14px; border: 1px dashed var(--line); }
+.slot12.on { border: 1px solid #7a5a00; background: linear-gradient(90deg, #3b2a0099, transparent); }
+.list .s { min-width: 0; overflow-wrap: anywhere; }
+.list .s small { color: var(--muted); font-size: 14px; margin-right: 6px; }
+.douze { font-family: var(--font-display); font-weight: 900; font-size: clamp(26px, 3.4vw, 38px); color: var(--gold); text-align: left; padding: 0; animation: pop .6s cubic-bezier(.3,1.6,.5,1); }
+@keyframes pop { from { transform: scale(.5); opacity: 0; } }
+.hint { color: var(--muted); font-size: 13px; text-align: center; }
+.kbd { font-family: var(--font-body); font-size: 12px; border: 1px solid var(--line); border-radius: 6px; padding: 1px 6px; color: var(--ink); }
+.controls { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+.controls button { font: inherit; font-size: 13px; font-weight: 600; color: var(--ink); background: #ffffff10; border: 1px solid var(--line); border-radius: 9px; padding: 8px 14px; cursor: pointer; }
+.controls button:hover { background: #ffffff1c; }
+.controls button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.winner { text-align: center; display: grid; gap: 6px; }
+.winner .cup { font-size: 44px; line-height: 1; }
+.winner b { font-family: var(--font-display); font-weight: 800; font-size: 22px; color: var(--gold); }
+.empty-board { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; color: var(--muted); font-size: 16px; border: 1px dashed var(--line); border-radius: 16px; padding: 24px; }
+.empty-board b { display: block; font-family: var(--font-display); font-size: 22px; color: var(--ink); margin-bottom: 8px; }
+@media (prefers-reduced-motion: reduce) { .row, .gain, .bar > i { transition: none; } .total.bump, .douze { animation: none; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <div>
+      <div class="eyebrow">Голосование среди друзей · результаты</div>
+      <h1>Национальные отборы России на&nbsp;Евровидение <em>1994–2021</em></h1>
+    </div>
+    <div class="progress">
+      <div class="progress-label" id="plabel">Голосуют 0 из 0</div>
+      <div class="bar"><i id="pbar"></i></div>
+    </div>
+  </header>
+
+  <div class="grid">
+    <div class="board" id="board" role="list" aria-label="Топ-10"></div>
+    <aside class="card" id="card" aria-live="polite"></aside>
+  </div>
+</div>
+
+<script>
+const DATA = {"songs":{"0":[1994,"Youddiph","Vechny strannik",1],"23":[1996,"Nogu Svelo!","Moskovskiy romans",0],"32":[1997,"Alla Pugacheva","Primadonna",1],"33":[2000,"Alsou","Solo",1],"35":[2002,"Prime Minister","Northern Girl",1],"36":[2003,"t.A.T.u.","Ne ver', ne boysia",1],"37":[2004,"Julia Savicheva","Believe Me",1],"38":[2005,"Natalia Podolskaya","Nobody Hurt No One",1],"39":[2005,"A-Sortie","Keep On Shining",0],"41":[2005,"Anastasia Stotskaya","Shadows Dance All Around Me",0],"48":[2005,"Dima Bilan","Not That Simple",0],"51":[2005,"Katya Bachurina","Teryala tebya",0],"52":[2005,"KGB","Stop",0],"58":[2005,"Polina Griffith","Justice of Love",0],"59":[2005,"Reflex","Lyublyu",0],"60":[2005,"Roman Polonskiy","The Story of My Life",0],"63":[2005,"Slava","I Wanna Be the One",0],"64":[2005,"Varvara","Letala da pela",0],"67":[2006,"Dima Bilan","Never Let You Go",1],"68":[2007,"Serebro","Song #1",1],"69":[2008,"Dima Bilan","Believe",1],"70":[2008,"A-Sortie","Colours of My Love",0],"79":[2008,"Granat","Another Side of Midnight",0],"82":[2008,"Natalia Astafyeva","Tri luny",0],"91":[2008,"Sergey Lazarev","Flyer",0],"94":[2008,"Zhenya Otradnaya","Porque amor",0],"96":[2009,"Anastasia Prikhodko","Mamo",1],"104":[2009,"Plazma","Never Ending Story",0],"106":[2009,"Princessa Avenue","Never, Never",0],"112":[2010,"Peter Nalitch & Friends","Lost and Forgotten",1],"131":[2010,"Pavla","Infatuated",0],"138":[2012,"Buranovskiye Babushki","Party for Everybody",1],"140":[2012,"Chinkong ft. Karina","High Up",0],"141":[2012,"Dima Bilan & Julia Volkova","Back to Her Future",0],"146":[2012,"Irson Kudikova","Woman's Heart Never Lies",0],"153":[2012,"Olga Makovetskaya","Positive Emotions",0],"154":[2012,"Pavla","One Million Butterflies",0],"159":[2012,"Syostry Syo","Une marionette",0],"163":[2013,"Dina Garipova","What If",1],"164":[2014,"Tolmachevy Sisters","Shine",1],"165":[2015,"Polina Gagarina","A Million Voices",1],"166":[2016,"Sergey Lazarev","You Are the Only One",1],"167":[2017,"Julia Samoylova","Flame Is Burning",1],"169":[2019,"Sergey Lazarev","Scream",1],"171":[2021,"Manizha","Russian Woman (Russkaya zhenshchina)",1],"173":[2021,"Therr Maitz","Future Is Bright",0]},"voters":[{"n":"Денис Беонсыч","p":{"1":104,"2":38,"3":169,"4":67,"5":48,"6":36,"7":96,"8":166,"10":68,"12":33}},{"n":"Иринка Дубова ⭐","p":{"1":63,"2":58,"3":70,"4":41,"5":106,"6":154,"7":48,"8":59,"10":141,"12":167}},{"n":"Маковка","p":{"1":51,"2":112,"3":141,"4":82,"5":79,"6":106,"7":164,"8":36,"10":67,"12":166}},{"n":"Влад","p":{"1":79,"2":68,"3":36,"4":70,"5":48,"6":67,"7":41,"8":165,"10":166,"12":173}},{"n":"Женечка дорогая","p":{"1":32,"2":0,"3":141,"4":106,"5":48,"6":165,"7":33,"8":166,"10":36,"12":68}},{"n":"Софа Билановна","p":{"1":52,"2":38,"3":33,"4":67,"5":166,"6":60,"7":163,"8":91,"10":48,"12":165}},{"n":"Мать Раздвигалочек","p":{"1":70,"2":79,"3":63,"4":64,"5":48,"6":140,"7":153,"8":141,"10":91,"12":131}},{"n":"Принцесса Павла Алла","p":{"1":138,"2":67,"3":68,"4":38,"5":37,"6":166,"7":131,"8":106,"10":32,"12":0}},{"n":"Бурановский дедушка","p":{"1":23,"2":32,"3":63,"4":35,"5":37,"6":173,"7":166,"8":33,"10":68,"12":38}},{"n":"Юра","p":{"1":165,"2":146,"3":166,"4":33,"5":68,"6":69,"7":141,"8":106,"10":36,"12":67}},{"n":"Алекс","p":{"1":48,"2":154,"3":159,"4":106,"5":41,"6":91,"7":70,"8":94,"10":131,"12":104}},{"n":"Кирилл","p":{"1":32,"2":64,"3":68,"4":39,"5":138,"6":171,"7":166,"8":41,"10":67,"12":173}}]};
+const POINTS_LOW = [1, 2, 3, 4, 5, 6, 7, 8, 10];
+const songs = {};
+for (const [i, [year, artist, song, rep]] of Object.entries(DATA.songs)) songs[i] = { id: i, year, artist, song, rep: !!rep };
+const voters = DATA.voters;
+const STEPS = voters.length * 2;           // per voter: 1–10, then 12
+let step = 0;
+
+const $ = id => document.getElementById(id);
+function el(tag, cls, text) { const n = document.createElement(tag); if (cls) n.className = cls; if (text != null) n.textContent = text; return n; }
+
+function stateAt(s) {
+  const tot = {}, tw = {}, vc = {};
+  for (const id in songs) { tot[id] = 0; tw[id] = 0; vc[id] = 0; }
+  let gains = {};
+  for (let k = 0; k < s; k++) {
+    const v = voters[Math.floor(k / 2)];
+    const twelve = k % 2 === 1;
+    const g = {};
+    for (const [p, id] of Object.entries(v.p)) {
+      const pt = Number(p);
+      if ((pt === 12) !== twelve) continue;
+      tot[id] += pt; vc[id] += 1; if (pt === 12) tw[id] += 1;
+      g[id] = pt;
+    }
+    gains = g;
+  }
+  const order = Object.keys(songs).sort((a, b) => tot[b] - tot[a] || tw[b] - tw[a] || vc[b] - vc[a] || songs[a].year - songs[b].year || songs[a].artist.localeCompare(songs[b].artist));
+  return { tot, gains: s ? gains : {}, order };
+}
+
+const rowEls = new Map();
+let prevTot = {};
+
+function makeRow(id) {
+  const e = songs[id];
+  const r = el("div", "row"); r.setAttribute("role", "listitem");
+  const who = el("div", "who");
+  const b = el("b"); if (e.rep) b.append(el("span", "star", "★ ")); b.append(document.createTextNode(e.artist));
+  who.append(b, el("span", null, e.song));
+  r.append(el("div", "rank"), el("div", "year", e.year), who, el("div", "gain"), el("div", "total", "0"));
+  r.style.top = "calc((var(--rh) + 6px) * 10)"; r.style.opacity = "0";
+  $("board").append(r);
+  rowEls.set(id, r);
+  return r;
+}
+
+function renderBoard(st) {
+  const board = $("board");
+  const top = st.order.filter(id => st.tot[id] > 0).slice(0, 10);
+  const empty = board.querySelector(".empty-board");
+  if (!top.length) {
+    if (!empty) { const d = el("div", "empty-board"); const t = el("div"); t.append(el("b", null, "Douze points!"), document.createTextNode("Нажми в любом месте, чтобы первый голосующий раздал баллы.")); d.append(t); board.append(d); }
+  } else if (empty) empty.remove();
+  const keep = new Set(top);
+  let rank = 0, prevPts = null;
+  top.forEach((id, i) => {
+    const r = rowEls.get(id) || makeRow(id);
+    rank = i + 1;
+    r.querySelector(".rank").textContent = rank;
+    const tot = r.querySelector(".total");
+    if (prevTot[id] !== undefined && prevTot[id] !== st.tot[id]) { tot.classList.remove("bump"); void tot.offsetWidth; tot.classList.add("bump"); }
+    tot.textContent = st.tot[id];
+    const g = r.querySelector(".gain");
+    const gain = st.gains[id];
+    g.textContent = gain ? "+" + gain : "";
+    g.classList.toggle("on", !!gain); g.classList.toggle("twelve", gain === 12);
+    r.classList.toggle("got", !!gain);
+    r.classList.toggle("lead", rank === 1);
+    requestAnimationFrame(() => { r.style.top = "calc((var(--rh) + 6px) * " + i + ")"; r.style.opacity = "1"; });
+  });
+  for (const [id, r] of rowEls) {
+    if (keep.has(id)) continue;
+    r.style.top = "calc((var(--rh) + 6px) * 10)"; r.style.opacity = "0";
+    rowEls.delete(id);
+    setTimeout(() => r.remove(), 900);
+  }
+  prevTot = { ...st.tot };
+}
+
+function songLine(id) { const e = songs[id]; const s = el("span", "s"); s.append(el("small", null, e.year)); s.append(document.createTextNode((e.rep ? "★ " : "") + e.artist + " — " + e.song)); return s; }
+
+function renderCard(st) {
+  const card = $("card"); card.textContent = "";
+  if (step === 0) {
+    card.append(el("div", "eyebrow", "Студия готова"), el("div", "spokes", "Слово нашим голосующим"));
+    const p = el("p", "hint"); p.style.textAlign = "left"; p.style.margin = "0";
+    p.textContent = "Голосуют " + voters.length + " человек. Каждый сначала раздаёт баллы от 1 до 10, а потом объявляет свои douze points.";
+    card.append(p);
+  } else if (step > STEPS) {
+    const st2 = stateAt(STEPS); const w = songs[st2.order[0]];
+    const d = el("div", "winner");
+    d.append(el("div", "cup", "🏆"), el("div", "eyebrow", "Победитель"), el("b", null, w.artist), el("div", null, w.song + " · " + w.year + " · " + st2.tot[w.id] + " баллов"));
+    card.append(d);
+  } else {
+    const vi = Math.floor((step - 1) / 2); const v = voters[vi]; const twelve = (step - 1) % 2 === 1;
+    card.append(el("div", "eyebrow", "Голосует " + (vi + 1) + " из " + voters.length), el("div", "spokes", v.n));
+    const top12 = el("div", "slot12" + (twelve ? " on" : ""));
+    if (twelve && v.p[12] != null) {
+      top12.append(el("div", "douze", "Douze points!"));
+      const ul2 = el("ul", "list"); const li = el("li", "on twelve"); li.append(el("span", "p", 12), songLine(v.p[12])); ul2.append(li); top12.append(ul2);
+    } else {
+      const ul2 = el("ul", "list"); const li = el("li", "twelve wait"); li.append(el("span", "p", 12), el("span", "s", "…")); ul2.append(li); top12.append(ul2);
+    }
+    const ul = el("ul", "list");
+    [...POINTS_LOW].reverse().forEach(p => { if (v.p[p] == null) return; const li = el("li", "on"); li.append(el("span", "p", p), songLine(v.p[p])); ul.append(li); });
+    card.append(top12, ul);
+  }
+  const h = el("div", "hint");
+  h.append(document.createTextNode(step > STEPS ? "Голосование завершено" : (step === 0 ? "Клик, пробел или → — дальше" : "Клик, пробел или → — дальше · ← — назад")));
+  card.append(h);
+  const c = el("div", "controls");
+  const back = el("button", null, "← Назад"); back.type = "button"; back.disabled = step === 0;
+  back.addEventListener("click", e => { e.stopPropagation(); go(-1); });
+  const restart = el("button", null, "Сначала"); restart.type = "button";
+  restart.addEventListener("click", e => { e.stopPropagation(); step = 0; render(); });
+  if (step > 0) c.append(back);
+  if (step > STEPS) c.append(restart);
+  if (c.childNodes.length) card.append(c);
+}
+
+function render() {
+  const st = stateAt(Math.min(step, STEPS));
+  if (step > STEPS) st.gains = {};
+  renderBoard(st);
+  renderCard(st);
+  const done = Math.min(Math.ceil(step / 2), voters.length);
+  $("plabel").textContent = "Проголосовали " + done + " из " + voters.length;
+  $("pbar").style.width = (Math.min(step, STEPS) / STEPS * 100) + "%";
+}
+
+function go(d) { step = Math.max(0, Math.min(STEPS + 1, step + d)); render(); }
+document.addEventListener("click", e => { if (e.target.closest("button")) return; go(1); });
+document.addEventListener("keydown", e => {
+  if (e.key === "ArrowRight" || e.key === " " || e.key === "Enter") { e.preventDefault(); go(1); }
+  else if (e.key === "ArrowLeft" || e.key === "Backspace") { e.preventDefault(); go(-1); }
+});
+render();
+</script>
